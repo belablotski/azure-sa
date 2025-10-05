@@ -1,4 +1,6 @@
-[azure-storage-actions.pdf](./docs/azure-storage-actions.pdf) (downloaded 10/4/2025 from https://learn.microsoft.com/en-us/azure/storage-actions/storage-tasks/) provides a comprehensive guide to Azure Storage Actions, a serverless framework for automating data management tasks across Azure Blob Storage and Azure Data Lake Storage.
+## Data Management with Azure Storage Actions
+
+The [docs/azure-storage-actions.pdf](./docs/azure-storage-actions.pdf) (downloaded 10/4/2025 from https://learn.microsoft.com/en-us/azure/storage-actions/storage-tasks/) provides a comprehensive guide to Azure Storage Actions, a serverless framework for automating data management tasks across Azure Blob Storage and Azure Data Lake Storage.
 
 ### Key Features:
 
