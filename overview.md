@@ -39,6 +39,18 @@ The document provides detailed instructions on how to create and manage storage 
 *   **ARM Templates, Bicep, and Terraform:** Define storage tasks as infrastructure-as-code for repeatable deployments.
 *   **.NET:** Use the Azure Storage Actions client library for .NET to programmatically manage storage tasks.
 
+### Supported Storage Types
+
+Azure Storage Actions is a highly specialized service designed exclusively for managing data within **Azure Blob Storage**. It does not support other Azure Storage data services like Files, Queues, or Tables.
+
+| Storage Type | Supported by Azure Storage Actions? | Notes |
+| :--- | :--- | :--- |
+| **Azure Blobs (Standard)** | ✅ **Yes (Full Support)** | This is the primary target for the service. All features, such as tiering and tagging, are fully supported. |
+| **Azure Data Lake Storage Gen2** | ✅ **Yes (Adapted Support)** | Explicitly supported, but with a key difference: you must use blob **metadata** for conditions, as blob index tags are not available on hierarchical namespace accounts. |
+| **Azure Files** | ❌ **No** | The service does not operate on file shares. All features and operations are blob-specific. |
+| **Azure Queues** | ❌ **No** | The service is for managing data at rest, not for processing messages in a queue. |
+| **Azure Tables** | ❌ **No** | The service operates on unstructured objects (blobs), not on structured data within a NoSQL table. |
+
 ### Best Practices and Considerations:
 
 *   **Permissions:** Proper RBAC roles are required to manage storage tasks and for tasks to perform operations on storage accounts.
@@ -56,20 +68,18 @@ The document also outlines several known issues and limitations, such as:
 *   Restrictions on moving storage tasks between regions or subscriptions.
 *   Concurrency limits for task execution on a single storage account.
 
-### Top Advantages:
+### Key Advantages:
 
-1.  **Serverless Automation:** It provides a fully managed, serverless framework, meaning you don't have to provision or manage any compute infrastructure to run your data management tasks.
-2.  **No-Code/Low-Code Operations:** You can define complex data management workflows based on conditions and operations without writing any code, significantly lowering the barrier to entry.
-3.  **Massive Scalability:** It's designed to perform operations on millions or even billions of objects across multiple storage accounts efficiently.
-4.  **Centralized Management:** You can define a single task and apply it to numerous storage accounts, simplifying the management of data policies across your entire Azure environment.
-5.  **Cost Optimization:** It helps automate lifecycle management, such as moving infrequently accessed data to cheaper storage tiers, which can lead to significant cost savings.
-6.  **Robust Monitoring and Alerting:** Deep integration with Azure Monitor provides detailed execution reports and performance metrics. This enables proactive alerting on failures and offers a comprehensive audit trail for compliance and troubleshooting.
+1.  **Serverless & Scalable:** Provides a fully managed, serverless framework that automatically scales to operate on billions of objects without requiring infrastructure management.
+2.  **No-Code & Centralized:** Allows you to define complex data policies once without writing code and apply them centrally across numerous storage accounts, simplifying management.
+3.  **Secure & Auditable:** Operates with credential-free **Managed Identities** and provides detailed, per-object execution reports, offering a robust security posture and a clear audit trail for compliance.
+4.  **Production-Safe:** Automatically **throttles its own performance** based on the available capacity of the storage account, ensuring that background data management tasks do not disrupt primary application workloads.
+5.  **DevOps Ready:** The entire configuration, from tasks to assignments, is fully manageable as **Infrastructure as Code** (Bicep, ARM, Terraform), enabling version control, peer review, and automated, repeatable deployments.
+6.  **Cost Optimization:** Enables automated data lifecycle management, such as tiering infrequently accessed data to cheaper storage, which can significantly reduce costs at scale.
 
-### Top 5 Disadvantages:
+### Key Disadvantages:
 
-1.  **Billing Obscurity:** Billing meters are associated only with the storage account name, not the task assignment name. This makes it difficult to correlate costs with specific automation tasks, especially in environments with many assignments.
-2.  **Static Task Assignments:** When you update a storage task's definition, the changes do not automatically apply to existing assignments. You must delete the old assignments and create new ones to pick up any changes, which can be a cumbersome and error-prone process.
-3.  **Inflexible Resource Management:** You cannot move storage tasks or their assignments between different resource groups or subscriptions. This lack of portability can be a significant issue for organizations that need to reorganize their Azure resources.
-4.  **Concurrency Limits:** There is a limit to the number of task assignments that can run concurrently on a single storage account. This can create bottlenecks and requires careful scheduling to ensure tasks complete in a timely manner without being paused.
-5.  **Limited Private Network Support:** In PREVIEW regions, operating on storage accounts within a private network (with IP or network access restrictions) is unsupported. Tasks require access via a public endpoint, which can be a security concern and a blocker for organizations with strict network policies.
-6.  **No Event-Driven Triggers:** The service operates on a scheduled basis (e.g., daily). It does not support true real-time, event-driven triggers that execute the instant a blob is created or modified. This results in a "near real-time" execution model with inherent latency.
+1.  **Scheduled, Not Real-Time:** The service operates on a schedule (with a minimum of one day for recurring tasks) and lacks instantaneous, event-driven triggers, making it unsuitable for use cases requiring immediate action.
+2.  **Inconsistent Feature Parity:** Key operations may be missing for certain storage configurations (e.g., the inability to **set blob metadata** on accounts with a hierarchical namespace), preventing consistent policy application everywhere.
+3.  **Complex Change Management:** Task definitions are not dynamically linked to their assignments. Applying an update to a task's logic requires deleting and recreating all of its associated assignments, which can be cumbersome and error-prone.
+4.  **Cost & Performance Opacity:** Billing is not granular to the specific task assignment, making precise cost attribution difficult. Similarly, performance is intentionally variable, which makes predicting exact job completion times challenging.
