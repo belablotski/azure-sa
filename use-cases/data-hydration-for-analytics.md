@@ -230,14 +230,14 @@ This approach provides a full audit trail for every rehydration request, ensurin
 ```mermaid
 graph TD
     subgraph "Request & Approval"
-        A[1. Analyst creates ticket<br/>(e.g., in ServiceNow)] --> B{2. Approval Workflow};
+        A[1. Analyst creates ticket<br/>e.g., in ServiceNow] --> B{2. Approval Workflow};
         B -- Approved --> C[3. Ticket status updated];
     end
 
     subgraph "Automated Trigger"
         C -- Event triggers --> D[4. Logic App is invoked];
         D --> E[5. Get Task Assignment ID];
-        E --> F[6. Enable Storage Task Assignment<br/>(for a single run)];
+        E --> F[6. Enable Storage Task Assignment<br/>for a single run];
     end
 
     subgraph "Storage Actions"
