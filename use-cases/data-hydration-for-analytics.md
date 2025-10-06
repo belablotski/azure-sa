@@ -38,7 +38,7 @@ graph TD
     end
 
     subgraph "Automated Rehydration Process"
-        C[3. On-Demand Trigger<br/>(Task is enabled for a single run)] --> D{Storage Task Runs};
+        C[3. On-Demand Trigger<br/>Task is enabled for a single run] --> D{Storage Task Runs};
         D --> E{Blob has correct tag AND is in Archive tier?};
         E -- Yes --> F[4. Set Blob Tier to Hot];
         E -- No --> G[5. End];
@@ -297,6 +297,35 @@ To ensure the process is working correctly and to provide visibility to the anal
 A critical challenge remains: the Storage Actions execution report confirms that the rehydration *request* was successfully submitted, not that the data is ready. Furthermore, a simple event subscription to the `BlobTierChanged` event would trigger a separate notification for every single rehydrated blob, creating an "email storm" for the end-user.
 
 The solution is to implement a stateful orchestration pattern using **Azure Durable Functions**. This workflow treats the entire rehydration job as a single transaction, tracking the status of all individual blobs and sending only one consolidated notification upon completion.
+
+#### The Fan-Out/Fan-In Tracking Pattern
+
+At its core, this solution uses the "Fan-Out/Fan-In" pattern, which is ideal for managing and monitoring a large number of parallel, asynchronous operations. The Durable Functions orchestrator acts as a stateful manager for the entire job: it "fans out" by defining a list of all blobs it needs to track, and then "fans in" by waiting for a completion signal for each of those blobs before triggering a final action.
+
+```mermaid
+graph TD
+    subgraph "Orchestration Setup (Fan-Out)"
+        A[Durable Orchestrator Starts] --> B["Reads manifest of N blobs<br/>(e.g., 10,000 blobs)"];
+        B --> C((Waits for N completion signals));
+    end
+
+    subgraph "Asynchronous Event Handling (runs N times)"
+        D[A single blob completes rehydration] --> E{Event Grid};
+        E -- BlobTierChanged event --> F[Event Handler Function];
+        F -- "Notifies Orchestrator:<br/>'Blob X is complete!'" --> C;
+    end
+
+    subgraph "Final Action (Fan-In)"
+        C -- "All N signals received" --> G[Activity Function];
+        G --> H[Send ONE summary email];
+    end
+
+    style A fill:#8a2be2,color:#fff
+    style C fill:#8a2be2,color:#fff
+    style H fill:#28a745,color:#fff
+```
+
+The following diagram shows how this tracking pattern fits into the complete, end-to-end workflow, from the moment the Storage Actions report is generated.
 
 ```mermaid
 graph TD
