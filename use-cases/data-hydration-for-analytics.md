@@ -332,7 +332,7 @@ graph TD
     subgraph "Step 1: Report Generation"
         A[Storage Actions Run Completes] --> B[Writes Matched Blobs File];
         A --> C[Writes Success/Failure Files];
-        A --> E[<b>Writes Run Status File (Manifest)</b>];
+        A --> E[<b>Writes Run Status File</b><br/> aka Manifest];
     end
 
     subgraph "Step 2: Precision Triggering"
